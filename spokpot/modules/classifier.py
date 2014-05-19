@@ -1,12 +1,14 @@
 import re
+import urllib.parse
 from modules.emulator.index import IndexDork
 from modules.emulator.lfi import LocalFileInclusion
+from modules.emulator.pma import PhpMyAdminEmu
 
 class Classifier():
     """
     this is the regex to determine the type of attack/request
-
     """
+
     regex_rfi = '.*(=.*(http(s){0,1}|ftp(s){0,1}):).*'
     regex_php_inj = '.*(define|eval|file_get_contents|include|require|require_once|set|shell_exec|phpinfo|system|passthru|preg_|execute|echo|print|print_r|var_dump|[fp]open)\(.*'
     regex_php = '.*(<\?php).*'
@@ -39,6 +41,7 @@ class Classifier():
         # print(hasil)  
 
         # classification of the request
+        requestURI = urllib.parse.unquote(requestURI)
         result = ''
         for pattern in (self.regex_rfi, self.regex_php, self.regex_lfi, self.regex_favicon, self.regex_css, self.regex_pma):
             match = re.search(pattern, requestURI, re.IGNORECASE)
@@ -47,16 +50,22 @@ class Classifier():
                 
                 if pattern == self.regex_rfi:
                     result = self.rfi()
+                    break
                 elif pattern == self.regex_php:
                     result = self.php()
+                    break
                 elif pattern == self.regex_lfi:
-                    result = self.lfi()
+                    result = self.lfi(requestURI)
+                    break
                 elif pattern == self.regex_favicon:
                     result = self.favicon()
+                    break
                 elif pattern == self.regex_css:
                     result = self.css()
+                    break
                 elif pattern == self.regex_pma:
-                    print('pma')
+                    result = self.pma(requestURI)
+                    break
                 else:
                     break
             elif pattern == self.regex_pma:
@@ -70,9 +79,13 @@ class Classifier():
     def getFileType(self):
         return self.fileType
 
-    def lfi(self):
+    def lfi(self, requestURI):
         print('let me find the file for you')
-        result = LocalFileInclusion.handle(self)
+        includer = LocalFileInclusion()
+        result = includer.handle(requestURI)
+        self.fileType = includer.getFileType()
+        return result
+
 
     def rfi(self):
         print('where the remote file location?')
@@ -82,29 +95,32 @@ class Classifier():
         print('wait, i dont think i run php here?')
         return 'php'
 
-    def pma(self):
-        return 'pma'
+    def pma(self, requestURI):
+        pma = PhpMyAdminEmu()
+        return pma.handle(requestURI)
 
     def dork(self):
         print('wth is your request')
         dorker = IndexDork()
+        result = dorker.generateBody()
         self.setFileType(dorker.getFileType())
-        return dorker.generateBody()
+        return result
 
     def favicon(self):
         print('wth is favicon')
         dorker = IndexDork()
+        result = dorker.sendFavicon()
         self.setFileType(dorker.getFileType())
-        return dorker.sendFavicon()
+        return result
 
     def css(self):
         print('do we need css?')
         dorker = IndexDork()
+        result = dorker.sendCss()
         self.setFileType(dorker.getFileType())
-        return dorker.sendCss()
+        return result
         
 
 
 # spoker = Classifier()
 # print(spoker.spokme('/robots.txt '))
-

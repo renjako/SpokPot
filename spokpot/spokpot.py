@@ -1,4 +1,5 @@
-from wsgiref.simple_server import make_server
+import sys
+import os
 from cgi import parse_qs
 from modules.classifier import Classifier 
 # Every WSGI application must have an application object - a callable
@@ -51,8 +52,22 @@ class SpokPot(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-Length', str(len(body)))
         self.send_header('Content-type', whatami.getFileType())
+        print(whatami.getFileType())
         self.end_headers()
         self.wfile.write(body)
+
+    def do_POST(self):
+        self.send_response(200)
+        self.wfile.write(b'this is post')
+
+    def log_message(self, format, *args):
+        thefile = 'coba.log'
+        sys.stderr.write("%s - - [%s] %s\n" %
+            (self.address_string(),
+                self.log_date_time_string(),
+                format%args))
+        with open(thefile, 'a+') as tulis:
+            tulis.write(self.address_string()+' '+self.log_date_time_string()+' '+format%args+'\n')
 
 class ThreadServer(ThreadingMixIn, HTTPServer):
     """run baby run run"""
