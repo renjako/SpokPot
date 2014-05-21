@@ -1,9 +1,17 @@
 from sqlite3 import dbapi2 as sqlite3
-from flask import Flask, g
+from flask import Flask, g, render_template
+import jinja2
+import os
 app = Flask(__name__)
 
 DATABASE = 'glastopf.db'
 
+
+@app.after_request
+def add_header(response):
+	response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
+	response.headers['Cache-Control'] = 'public, max-age=0'
+	return response
 
 @app.route("/")
 def index():
@@ -11,10 +19,11 @@ def index():
 	# curr = db.execute("select * from events where id = 1")
 	# entries  = curr.fetchall()
 	result = ''
-	for events in query_db('select * from events where id = 1'):
-		print(events[0], 'has the id', events[1])
-		result += str(events[0]) +' '+ events[1] +' '+ events[2] +' '+' '+ events[3] +' '+ events[4] +' '+ events[5] +'<br/>'
-	return result
+	for events in query_db('select * from events where id == 10'):
+		result += str(events[0]) +' '+ events[1] +' '+ events[2] +' '+' '+ events[3] +' '+ events[4] +' '+ events[5] 
+
+	events = query_db('select * from events where id == 10')
+	return render_template('report.html', events=events)
 
 def get_db():
 	db = getattr(g, '_database', None)
@@ -35,5 +44,5 @@ def query_db(query, args=(), one=False):
 
 
 if __name__ == "__main__":
-    app.debug = True
-    app.run(host='0.0.0.0')
+	app.debug = True
+	app.run(host='0.0.0.0')
