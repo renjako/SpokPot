@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+    <title>{% block title %}{% endblock %} - My Webpage</title>
+    {% endblock %}
+  </head>
+  <body>
+    <div id="content">
+      <ul class=entries>
+        {% for event in events %}
+        <li><h2>{{ event[1] }}</h2>{{ event[2] }}
+        {% else %}
+        <li><em>Unbelievable.  No entries here so far</em>
+            {% endfor %}
+      </ul>
+    </div>
+    <div id="footer">
+      tes
+    </div>
+  </body>
+</html>
