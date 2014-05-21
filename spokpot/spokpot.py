@@ -42,6 +42,7 @@ class SpokPot:
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
+
 class SpokPot(BaseHTTPRequestHandler):
     sys_version = ''
     server_version = 'Apache/2.0.48'
