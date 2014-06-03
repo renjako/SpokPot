@@ -80,7 +80,7 @@ class Classifier():
         return self.fileType
 
     def lfi(self, requestURI):
-        print('let me find the file for you')
+        # print('let me find the file for you')
         includer = LocalFileInclusion()
         result = includer.handle(requestURI)
         self.fileType = includer.getFileType()
@@ -88,11 +88,11 @@ class Classifier():
 
 
     def rfi(self):
-        print('where the remote file location?')
+        # print('where the remote file location?')
         return 'rfi'
 
     def php(self):
-        print('wait, i dont think i run php here?')
+        # print('wait, i dont think i run php here?')
         return 'php'
 
     def pma(self, requestURI):
@@ -100,21 +100,21 @@ class Classifier():
         return pma.handle(requestURI)
 
     def dork(self):
-        print('wth is your request')
+        # print('wth is your request')
         dorker = IndexDork()
         result = dorker.generateBody()
         self.setFileType(dorker.getFileType())
         return result
 
     def favicon(self):
-        print('wth is favicon')
+        # print('wth is favicon')
         dorker = IndexDork()
         result = dorker.sendFavicon()
         self.setFileType(dorker.getFileType())
         return result
 
     def css(self):
-        print('do we need css?')
+        # print('do we need css?')
         dorker = IndexDork()
         result = dorker.sendCss()
         self.setFileType(dorker.getFileType())
