@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<h1>id : {{ event.id }} </h1>
+<h2>time : {{event.time}} </h2>
+<h2>ip source : {{event.source}}</h2>
+<h2>uri : {{event.request_url}}</h2>
+<h2>request header : {{event.request_raw}}</h2>
+<h2>type : {{event.pattern}}</h2>
+<h2>file : {{event.filename}}</h2>
+{% endblock %}
+{% block script %}
+{% endblock %}
