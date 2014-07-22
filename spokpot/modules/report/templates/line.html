@@ -1,0 +1,144 @@
+{% extends 'layout.html' %}
+{% block head %}
+{% endblock %}
+{% block chartactive %} active {% endblock %}
+{%- block content %}
+<div class="row">
+	<div class="col-xs-12">
+
+		<div class="box box-primary">
+			<div class="box-header">
+                <div class="box-tools">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default">Pattern</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{url_for('line')}}"> All </a></li>
+                            {%- for pat in pattern %}
+                                <li><a href="{{url_for('line')}}{{pat.pattern}}"> {{pat.pattern}} </a></li>
+                            {%- endfor %}
+                        </ul>
+                    </div>                
+                </div>
+                <h3 class="box-title">{% if type %}{{type}}{% else %}All{% endif %} Request per Day</h3>
+			</div>
+			<div class="box-body">
+				<div id="request" style="height: 338px;" class="full-width-chart"></div>
+
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12">
+		<div class="box box-primary">
+
+			<div class="box-header">
+				<h3 class="box-title">10 last data of {% if type %}{{type}}{% else %}All{% endif %}</h3>
+<!-- 				<div class="box-tools">
+					<ul class="pagination pagination-sm no-margin pull-right">
+                        <li><a href="#">&laquo;</a></li>
+                        <li><a href="#">1</a></li>
+                        <li><a href="#">2</a></li>
+                        <li><a href="#">3</a></li>
+                        <li><a href="#">&raquo;</a></li>
+                    </ul>
+                </div> -->
+			</div>
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Time</th>
+                            <th>Source</th>
+                            <th>Uri</th>
+                            <th>Request Header</th>
+                            <th>Type</th>
+                            <th>File</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for event in events %}
+                        <tr>
+                            <td><a href="{{url_for('attack')}}/{{event.id}}">{{ event.id }}</a></td>
+                            <td>{{ event.time }}</td>
+                            <td>{{ event.source }}</td>
+                            <td>{{ event.request_url }}</td>
+                            <td>{{ event.request_raw }}</td>
+                            <td>{{ event.pattern }}</td>
+                            <td>{{ event.filename }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>                                         
+                </table>
+			</div>
+		</div>
+	</div>	
+</div>
+
+{%- endblock %}
+{% block script %}
+<script src="{{ url_for('static', filename='js/jquery.flot.js') }}"></script>
+<script src="{{ url_for('static', filename='js/Chart.js') }}"></script>
+
+<script type="text/javascript">
+
+		// var lineChartData = {
+		// 	labels : [{% for chart in bydate %}"{{ chart.date }}",{% endfor %}],
+		// 	datasets : [
+		// 		{
+		// 			fillColor : "rgba(151,187,205,0.5)",
+		// 			strokeColor : "rgba(151,187,205,1)",
+		// 			pointColor : "rgba(151,187,205,1)",
+		// 			pointStrokeColor : "#fff",
+		// 			data : [{% for chart in bydate %}{{ chart.sum }},{% endfor %}]
+		// 		}
+		// 	]
+			
+		// }
+
+		// var myLine = new Chart(document.getElementById("line").getContext("2d")).Line(lineChartData);
+
+		// var pieData = [
+		// 		{%- for pat in bypattern %}
+		// 			{
+		// 				value: {{pat.sum}},
+		// 				color:"{{pat.color}}",
+		// 			},
+		// 		{%- endfor %}
+			
+		// 	];
+
+		// var myPie = new Chart(document.getElementById("pie").getContext("2d")).Pie(pieData);
+
+
+
+        var request = [{% for chart in bydate %}[{{loop.index}},{{ chart.sum }}],{% endfor %}]
+
+
+        $.plot("#request", [request], {
+            grid: {
+                borderWidth: 0
+            },
+            series: {
+                shadowSize: 0, // Drawing is faster without shadows
+                color: "#00c0ef"
+            },
+            lines: {
+                fill: true //Converts the line chart to area chart                        
+            },
+            yaxis: {
+                show: true
+            },
+            xaxis: {
+            	ticks: [{% for chart in bydate %}[{{ loop.index }},"{{ chart.date }}"],{% endfor %}]
+            }
+
+        });
+
+        
+</script>
+
+{% endblock %}

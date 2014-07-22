@@ -2,7 +2,9 @@ import re
 import urllib.parse
 from modules.emulator.index import IndexDork
 from modules.emulator.lfi import LocalFileInclusion
+from modules.emulator.rfi import RemoteFileInclusion
 from modules.emulator.pma import PhpMyAdminEmu
+from modules.emulator.phpinfo import PHPinfo
 
 class Classifier():
     """
@@ -29,9 +31,12 @@ class Classifier():
     regex_login = '^/login'
     regex_tomcat_man = '^/manager/html'
     regex_tomcat_stat = '^/manager/status'
+    regex_phpinfo = '^/info.php|^/phpinfo.php|^/phpinfo.html'
         
     def __init__(self):
             self.fileType = 'iki loh'
+            self.pattern = ''
+            self.filename = ''
 
     def spokme(self, requestURI):
 
@@ -43,35 +48,89 @@ class Classifier():
         # classification of the request
         requestURI = urllib.parse.unquote(requestURI)
         result = ''
-        for pattern in (self.regex_rfi, self.regex_php, self.regex_lfi, self.regex_favicon, self.regex_css, self.regex_pma):
+        for pattern in (self.regex_rfi, self.regex_php, self.regex_sqli, self.regex_php, self.regex_lfi, self.regex_favicon, self.regex_css, self.regex_robot, self.regex_login, self.regex_tomcat_man, self.regex_tomcat_stat, self.regex_pma, self.regex_phpinfo):
             match = re.search(pattern, requestURI, re.IGNORECASE)
             # print(type(match))
             if match:
                 
                 if pattern == self.regex_rfi:
-                    result = self.rfi()
+                    print('RFI')
+                    self.setPattern('rfi')
+                    result = self.rfi(requestURI)
                     break
                 elif pattern == self.regex_php:
+                    print('php')
+                    self.setPattern('php')
                     result = self.php()
                     break
+                elif pattern == self.regex_sqli:
+                    print('SQL Injection')
+                    self.setPattern('sqli')
+                    result = self.sqli()
+                    break
                 elif pattern == self.regex_lfi:
+                    print('LFI')
+                    self.setPattern('lfi')
                     result = self.lfi(requestURI)
                     break
                 elif pattern == self.regex_favicon:
+                    self.setPattern('favicon')
                     result = self.favicon()
                     break
                 elif pattern == self.regex_css:
+                    self.setPattern('style_css')
                     result = self.css()
                     break
+                elif pattern == self.regex_robot:
+                    print('robots')
+                    self.setPattern('robots')
+                    result = self.robot()
+                    break
                 elif pattern == self.regex_pma:
+                    print('phpmyadmin')
+                    self.setPattern('phpmyadmin')
                     result = self.pma(requestURI)
+                    break
+                elif pattern == self.regex_login:
+                    print('login')
+                    self.setPattern('login')
+                    result = self.login()
+                    break
+                elif pattern == self.regex_tomcat_man:
+                    print('tomcat manager')
+                    self.setPattern('tomcat manager')
+                    result = self.login()
+                    break
+                elif pattern == self.regex_tomcat_stat:
+                    print('tomcat status')
+                    self.setPattern('tomcat status')
+                    result = self.login()
+                    break
+                elif pattern == self.regex_phpinfo:
+                    print('phpinfo')
+                    self.setPattern('phpinfo')
+                    result = self.phpinfo()
                     break
                 else:
                     break
-            elif pattern == self.regex_pma:
+            elif pattern == self.regex_phpinfo:
+                print('unknown')
+                self.setPattern('unknown')
                 result = self.dork()
 
         return result
+
+    def setPattern(self, value):
+        self.pattern = value
+
+    def getPattern(self):
+        return self.pattern
+
+    def setFile(self, value):
+        self.filename = value
+
+    def getFile(self):
+        return self.filename
 
     def setFileType(self, value):
         self.fileType = value
@@ -79,31 +138,27 @@ class Classifier():
     def getFileType(self):
         return self.fileType
 
+    def rfi(self, requestURI):
+        includer = RemoteFileInclusion()
+        result = includer.handle(requestURI)
+        if result != None:
+            self.setFile(result[1])
+            return result[0]
+        else:
+            return result
+
+    def sqli(self):
+        # print('we dont have sqli')
+        return self.dork()
+
+    def php(self):
+        # print('we no run php')
+        return self.dork()
+
     def lfi(self, requestURI):
-        # print('let me find the file for you')
         includer = LocalFileInclusion()
         result = includer.handle(requestURI)
         self.fileType = includer.getFileType()
-        return result
-
-
-    def rfi(self):
-        # print('where the remote file location?')
-        return 'rfi'
-
-    def php(self):
-        # print('wait, i dont think i run php here?')
-        return 'php'
-
-    def pma(self, requestURI):
-        pma = PhpMyAdminEmu()
-        return pma.handle(requestURI)
-
-    def dork(self):
-        # print('wth is your request')
-        dorker = IndexDork()
-        result = dorker.generateBody()
-        self.setFileType(dorker.getFileType())
         return result
 
     def favicon(self):
@@ -120,7 +175,35 @@ class Classifier():
         self.setFileType(dorker.getFileType())
         return result
         
+    def robot(self):
+        # print('are we in the future?')
+        return self.dork()
 
+
+    def pma(self, requestURI):
+        pma = PhpMyAdminEmu()
+        return pma.handle(requestURI)  
+
+    def login(self):
+        return self.dork()
+
+    def tomcat_man(self):
+        return self.dork()
+
+    def tomcat_stat(self):
+        return self.dork()
+
+    def phpinfo(self):
+        phpinfoer = PHPinfo()
+        result = phpinfoer.handle()
+        self.fileType = phpinfoer.getFileType()
+        return result
+
+    def dork(self):
+        dorker = IndexDork()
+        result = dorker.generateBody()
+        self.setFileType(dorker.getFileType())
+        return result  
 
 # spoker = Classifier()
 # print(spoker.spokme('/robots.txt '))

@@ -124,20 +124,19 @@
                                 <i class="fa fa-angle-left pull-right"></i>
                             </a>
                             <ul class="treeview-menu">
-                                <li><a href="{{ url_for('chart')}}"><i class="fa fa-angle-double-right"></i> Line Chart </a></li>
-                                <li><a href="#"><i class="fa fa-angle-double-right"></i> Pie Chart</a></li>
-                                <li><a href="#"><i class="fa fa-angle-double-right"></i> Inline charts</a></li>
+                                <li><a href="{{ url_for('line')}}"><i class="fa fa-angle-double-right"></i> Chart By Date </a></li>
+                                <li><a href="{{ url_for('pie')}}"><i class="fa fa-angle-double-right"></i> Chart By Count</a></li>
                             </ul>
                         </li>
-                        <li class="treeview {% block dataactive %}{% endblock %}">
-                            <a href="#">
-                                <i class="fa fa-table"></i> <span>Data</span>
-                                <i class="fa fa-angle-left pull-right"></i>
+                        <li class="sidebar-menu">
+                            <a href="{{ url_for('request_url') }}">
+                                <i class="fa fa-table"></i> <span>Unknown Request</span>
                             </a>
-                            <ul class="treeview-menu">
-                                <li><a href="{{ url_for('data') }}"><i class="fa fa-angle-double-right"></i> All</a></li>
-                                <li><a href="#"><i class="fa fa-angle-double-right"></i> By Type</a></li>
-                            </ul>
+                        </li>
+                        <li class="sidebar-menu">
+                            <a href="{{ url_for('data') }}">
+                                <i class="fa fa-table"></i> <span>Data</span>
+                            </a>
                         </li>
                     </ul>
                 </section>

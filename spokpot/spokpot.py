@@ -1,51 +1,24 @@
 import sys
 import os
+import time
+import re
+from datetime import datetime
 from cgi import parse_qs
-from modules.classifier import Classifier 
-# Every WSGI application must have an application object - a callable
-# object that accepts two arguments. For that purpose, we're going to
-# use a function (note that you're not limited to a function, you can
-# use a class for example). The first argument passed to the function
-# is a dictionary containing CGI-style envrironment variables and the
-# second variable is the callable object (see PEP 333).
-
-"""
-class SpokPot:
-    def __call__(self, environ, start_response):
-        # construct uri of request
-        requestURI = environ.get('PATH_INFO')
-        if environ.get('QUERY_STRING'):
-        	requestURI += '?' + environ.get('QUERY_STRING')
-        print(requestURI)
-
-        whatami = Classifier()
-
-        attack = whatami.spokme(requestURI)
-        # print(attack)
-        determiner = AttackHandler()
-
-        # print(type(determiner.determine(attack)))
-
-
-        # The returned object is going to be printed
-        body = determiner.determine(attack).encode()
-        # if isinstance(body, str):
-        #     body.encode()
-        status = '200 OK' # HTTP Status
-        headers = [('Content-type', determiner.getFileType() )] # HTTP Headers
-        start_response(status, headers)
-
-        # return [b'hallo']
-        # print(type(body))
-        return [body]
-"""
-
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, CGIHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 
-class SpokPot(BaseHTTPRequestHandler):
+from modules.database.sqlite import init_db, db_session
+from modules.models.event import Event
+from modules.classifier import Classifier
+
+
+class SpokPot(CGIHTTPRequestHandler):
     sys_version = ''
     server_version = 'Apache/2.0.48'
+
+    # def __init__(self):
+    #     self.init_db()
+
     def do_GET(self):
         requestURI = self.path
         whatami = Classifier()
@@ -53,31 +26,74 @@ class SpokPot(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-Length', str(len(body)))
         self.send_header('Content-type', whatami.getFileType())
-        print(whatami.getFileType())
+        self.writeDB(whatami.getPattern(), whatami.getFile())
+        # print('iki header '+str(self.headers))
         self.end_headers()
         self.wfile.write(body)
 
+    def writeDB(self, pattern, filename):
+
+        event = Event()
+        event.time = self.log_date_time_string()
+        if self.headers['X-Forwarded-For'] and self.validateIPv4(self.headers['X-Forwarded-For']):
+            event.source = self.headers['X-Forwarded-For']
+        else:
+            event.source = str(self.address_string())
+        event.request_url = self.path
+        event.request_raw = self.command + ' ' + self.path + ' ' + self.request_version + '\n' + str(self.headers)
+        event.pattern = pattern
+        
+
+        event.filename = filename
+        db_session.add(event)
+        
+        try:
+            db_session.commit()
+        except:
+            db_session.rollback()
+        finally:
+            db_session.close()
+
     def do_POST(self):
-        self.send_response(200)
-        self.wfile.write(b'this is post')
+        self.do_GET()
 
     def log_message(self, format, *args):
         thefile = 'coba.log'
-        sys.stderr.write("%s - - [%s] %s\n" %
-            (self.address_string(),
+        if self.headers['X-Forwarded-For']:
+            ipbro = self.headers['X-Forwarded-For']
+        else:
+            ipbro = str(self.address_string()) 
+
+        sys.stderr.write("%s - [%s] %s\n" %
+            (ipbro,
                 self.log_date_time_string(),
                 format%args))
+
+
         with open(thefile, 'a+') as tulis:
-            tulis.write(self.address_string()+' '+self.log_date_time_string()+' '+format%args+'\n')
+            tulis.write(ipbro+' '+self.log_date_time_string()+' '+format%args+'\n')
+
+
+    def log_date_time_string(self):
+        dt_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        return dt_string
+
+    def validateIPv4(self, ip):
+        ip_regex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+        match = re.search(ip_regex, ip)
+        if match:
+            return True
+        else:
+            return False
+
 
 class ThreadServer(ThreadingMixIn, HTTPServer):
     """run baby run run"""
-
-httpd = ThreadServer(('',8000),SpokPot)
-
+port = 80
+httpd = ThreadServer(('',port),SpokPot)
 # honeypot = SpokPot()
 # httpd = make_server('', 8000, honeypot)
-print("Serving on port 8000...")
-
+print("Serving on port " + str(port) + "...")
+init_db()
 # Serve until process is killed
 httpd.serve_forever()

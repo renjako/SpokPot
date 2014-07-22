@@ -17,9 +17,9 @@ class PhpMyAdminEmu():
 		pattern = re.compile(r'(\.\./)*')
 		localfile = pattern.split(uri.split('/', 2)[-1], maxsplit=1)
 		path = os.path.join('modules/emulator/data/phpmyadmin/', localfile[-1])
-		print(path)
-		print('------')
-		print(self.collectfiles())
+		# print(path)
+		# print('------')
+		# print(self.collectfiles())
 		try:
 			if path in self.collectfiles():
 				

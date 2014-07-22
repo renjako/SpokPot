@@ -2,13 +2,58 @@
 {% block head %}
 {% endblock %}
 {% block content %}
-<h1>id : {{ event.id }} </h1>
-<h2>time : {{event.time}} </h2>
-<h2>ip source : {{event.source}}</h2>
-<h2>uri : {{event.request_url}}</h2>
-<h2>request header : {{event.request_raw}}</h2>
-<h2>type : {{event.pattern}}</h2>
-<h2>file : {{event.filename}}</h2>
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">Attack Details</h3>
+			</div>	
+			<div class="box-body">
+				<table class="table">
+                    <tr>
+                        <td>id</td>
+                        <td>{{event.id}}</td>
+                    </tr>
+                    <tr>
+                        <td>time</td>
+                        <td>{{event.time}}</td>
+                    </tr>
+                    <tr>
+                        <td>ip source</td>
+                        <td>{{event.source}}</td>
+                    </tr>
+                    <tr>
+                        <td>uri</td>
+                        <td>{{event.request_url}}</td>
+                    </tr>
+                    <tr>
+                        <td>header</td>
+                        <td>{{event.request_raw | safe}}</td>
+                        <!-- <td>GET / HTTP/1.1 <br>Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8<br> Accept-Encoding: gzip,deflate,sdch<br> Accept-Language: en-US,en;q=0.8,id;q=0.6,ms;q=0.4<br> Cache-Control: max-age=0<br> Connection: Keep-Alive<br> Host: 10.151.36.66<br> User-Agent: Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.114 Safari/537.36<br> X-Forwarded-For: 10.151.36.37<br> X-Forwarded-Host: 202.46.129.89<br> X-Forwarded-Server: 127.0.1.1</td> -->
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>{{event.pattern}}</td>
+                    </tr>
+                    <tr>
+                        <td>etc</td>
+                        <td>{{event.filename}}</td>
+                    </tr>
+                </table>
+<!-- 				<div class="row">
+					<div class="col-xs-4"><h2>id :</h3></div><div class="col-xs-8"><h3>{{ event.id }}</h3></div> 
+					<div class="col-xs-4"><h3>time :</h3></div><div class="col-xs-8"><h3>{{event.time}}</h3></div> 
+					<div class="col-xs-4"><h3>ip source :</h3></div><div class="col-xs-8"><h3>{{ event.source }}</h3></div> 
+					<div class="col-xs-4"><h3>uri :</h3></div><div class="col-xs-8"><h3>{{ event.request_url }}</h3></div> 
+					<div class="col-xs-4"><h3>header :</h3></div><div class="col-xs-8"><h3>{{ event.request_raw }}</h3></div> 
+					<div class="col-xs-4"><h3>type :</h3></div><div class="col-xs-8"><h3>{{ event.pattern }}</h3></div> 
+					<div class="col-xs-4"><h3>file :</h3></div><div class="col-xs-8"><h3>{{ event.filename }}</h3></div>
+				</div>	 -->
+			</div>
+		</div>
+	</div>
+</div>
+
 {% endblock %}
 {% block script %}
 {% endblock %}

@@ -1,29 +1,47 @@
-<!-- <!doctype html>
-<html>
-  <head>
-    {% block head %}
-    <title>{% block title %}{% endblock %} - My Webpage</title>
-    {% endblock %}
-  </head>
-  <body> -->
-  {% extends "layout.html" %}
-  {% block content %}
-                    <div class="nav-tabs-custom">
-                        <!-- Tabs within a box -->
-                        <ul class="nav nav-tabs pull-right">
-                            <li class="active"><a href="#revenue-chart" data-toggle="tab">Area</a></li>
-                            <li><a href="#sales-chart" data-toggle="tab">Donut</a></li>
-                            <li class="pull-left header"><i class="fa fa-inbox"></i> Rating</li>
-                        </ul>
-                        <div class="tab-content no-padding">
-                            <!-- Morris chart - Sales -->
-                            <div class="chart tab-pane active" id="revenue-chart" style="position: relative; height: 300px;"></div>
-                            <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;"></div>
-                        </div>
-                    </div>
-  {% endblock %}
-<!--     <div id="footer">
-      tes
-    </div>
-  </body>
-</html> -->
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="row">
+	<div class="col-xs-12">
+		<div class="col-xs-12">
+			<div class="box box-danger">
+				<div class="box-header">
+					<h3 class="box-title">Today Attack</h3>
+				</div>
+				<div class="box-body">
+					<canvas id="todaypattern" data-type="Bar" width="900" height="400" style="width: 900px; height: 400px;"></canvas>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12">
+			<div class="box box-primary">
+				<div class="box-header">
+					<h3 class="box-title"></h3>
+				</div>
+				<div class="box-body">
+				</div>
+			</div>			
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+{% block script %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/Chart.js') }}"></script>
+<script type="text/javascript">
+		var DataToday = {
+			labels : [{% for event in events %}"{{ event.pattern }}",{% endfor %}],
+			datasets : [
+				{
+					fillColor : "rgba(151,187,205,0.5)",
+					strokeColor : "rgba(151,187,205,1)",
+					pointColor : "rgba(151,187,205,1)",
+					data : [{% for event in events %}{{ event.sum }},{% endfor %}]
+				}
+			]
+			
+		}
+		var myBar = new Chart(document.getElementById("todaypattern").getContext("2d")).Bar(DataToday);
+</script>
+{% endblock %}
