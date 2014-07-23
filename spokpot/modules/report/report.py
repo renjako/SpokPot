@@ -15,7 +15,7 @@ from modules.database.sqlite import init_db, db_session
 from modules.models.event import Event
 
 app = Flask(__name__)
-DATABASE = 'acunetix.db'
+DATABASE = 'spokpot.db'
 app.secret_key = 'A49c,1050szd1295*&0l4l&'
 PER_PAGE = 20
 
@@ -41,7 +41,7 @@ def login_required(f):
 		return f(*args, **kwargs)
 	return decorated_function
 
-# pagination
+# paginationd
 def url_for_other_page(page):
 	args = request.view_args.copy()
 	args['page'] = page
