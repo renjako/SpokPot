@@ -23,7 +23,7 @@ class IndexDork():
     def generateBody(self):
         
 
-        conn = sqlite3.connect('0306.db')
+        conn = sqlite3.connect('dork.db')
         cursor = conn.cursor()
         # a = random.randrange(1,3)
         # if a ==1:
